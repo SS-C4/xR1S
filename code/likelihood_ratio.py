@@ -23,8 +23,10 @@ g2 = nx.read_adjlist("g2_adj")
 ########################################
 #mapping of g2 -> g1
 
+#Set g2_at to the exact overlap required. It is randomised right now, for purposes of testing.
+
 x = [i for i in range(6)]
-g2_at = [111 for i in range(6)]
+g2_at = [-1 for i in range(6)]
 
 ov = 3
 for i in range(ov):
@@ -33,7 +35,7 @@ for i in range(ov):
         r = random.randint(0,5)
     
     s = random.randint(0,5)
-    while g2_at[s] != 111:
+    while g2_at[s] != -1:
         s = random.randint(0,5)
     g2_at[s] = x[r]
 
