@@ -12,6 +12,11 @@ def to_int(adj):
             tmp[n].append(int(j))
     return tmp
 
+#Estimator 1
+def est_1(g1_num, g2_num, ov_num):
+    normal_fact = (max(g1_num, g2_num) - 1)
+    return (float( normal_fact * ov_num / (g1_num*g2_num - ov_num) ))
+
 #Adjacency and labels for graph 1
 g1 = nx.read_adjlist("g1_adj")
 g1_attr = [i for i in range(g1.number_of_nodes())]
@@ -90,35 +95,38 @@ def stuff_after_overlap(g2_at):
 #g2_at -> mapping of g2 -> g1
 #Set g2_at to the exact overlap required
 
-x = [i for i in range(6)]
-g2_at = [-1 for i in range(6)]
+x = [i for i in range(g2.number_of_nodes())]
+g2_at = [-1 for i in range(g2.number_of_nodes())]
 
 '''
 #for randomised testing; ov -> size of overlap
 ov = 3
 for i in range(ov):
-    r = random.randint(0,5)
+    r = random.randint(0,g2.number_of_nodes()-1)
     while x[r] in g2_at:
-        r = random.randint(0,5)
+        r = random.randint(0,g2.number_of_nodes()-1)
     
-    s = random.randint(0,5)
+    s = random.randint(0,g2.number_of_nodes()-1)
     while g2_at[s] != -1:
-        s = random.randint(0,5)
+        s = random.randint(0,g2.number_of_nodes()-1)
     g2_at[s] = x[r]
 
 stuff_after_overlap(g2_at)
 '''
 
 #for exhaustive average of all possible overlaps of given size -> ov
-ov = 3
-replace_ov = list(combinations(x,ov))
 
-array = []
-for cc in replace_ov:
-    g2_at = list(cc)+g2_at[ov:]
-    for per in list(unique_perm(g2_at)):
-        array += [stuff_after_overlap(list(per))]
-        
-print (mean(array))
+for ov in range(1,min(g1.number_of_nodes(),g2.number_of_nodes())+1):
+    replace_ov = list(combinations(x,ov))
 
+    array = []
+    for cc in replace_ov:
+        g2_at = list(cc)+g2_at[ov:]
+        for per in list(unique_perm(g2_at)):
+            array += [stuff_after_overlap(list(per))]   
+    
+    me = mean(array)
+    es_1 = est_1(g1.number_of_nodes(),g2.number_of_nodes(),ov)
+    div = float(es_1/me)  
 
+    print ("Overlap size = " + str(ov), ", Mean ratio = " + str(me), ", Est_1 = " + str(es_1), ", Div = " + str(div))
