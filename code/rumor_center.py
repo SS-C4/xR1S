@@ -7,7 +7,7 @@ import numpy
 
 rcParams['figure.figsize'] = 12, 12  # that's default image size for this interactive session
 
-def draw_graph(graph, labels, attr, graph_layout='spring', to_draw='0', 
+def draw_graph(graph, labels, attr, graph_layout='spring', to_draw=0, 
                node_size=1600, node_color='blue', node_alpha=0.3,
                node_text_size=12,
                edge_color='blue', edge_alpha=0.3, edge_tickness=1,
@@ -172,4 +172,9 @@ def nx_graph_to_adj(graph):
 
     return adj
 
-
+def to_int(adj):
+    tmp = [[] for i in range(len(adj))]
+    for n,i in enumerate(adj):
+        for m,j in enumerate(i):
+            tmp[n].append(int(j))
+    return tmp

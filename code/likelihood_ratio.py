@@ -5,13 +5,6 @@ import random
 def unique_perm(array):
     return {p for p in permutations(array)}
 
-def to_int(adj):
-    tmp = [[] for i in range(len(adj))]
-    for n,i in enumerate(adj):
-        for m,j in enumerate(i):
-            tmp[n].append(int(j))
-    return tmp
-
 #Estimator 1
 def est_1(g1_num, g2_num, ov_num):
     normal_fact = (max(g1_num, g2_num) - 1)
