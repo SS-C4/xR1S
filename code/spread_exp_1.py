@@ -73,20 +73,25 @@ if k > G.number_of_nodes():
 #Less than threshold = diff
 #More than threshold = same
 
+#Number of estimators
+n_est = 3
+
 #Run experiments
-N = 100
+N = 1000
 
-#positive = same
-#negative = diff
-tpr_1 = [] 
-fpr_1 = []
-tpr_2 = []
-fpr_2 = []
+#positive = same = More than threshold
+#negative = diff = Less than threshold
+tpr = [[] for i in range(n_est)] 
+fpr = [[] for i in range(n_est)]
 
-for threshold in np.linspace(0,1,10):
-	FP1 = FN1 = TP1 = TN1 = 0
-	FP2 = FN2 = TP2 = TN2 = 0
+for threshold in np.linspace(0,1,100):
+	FP = [0 for i in range(n_est)]
+	TP = [0 for i in range(n_est)]
+	FN = [0 for i in range(n_est)]
+	TN = [0 for i in range(n_est)]
 	
+	op = [0 for i in range(n_est)]
+
 	for i in range(N):
 		#choose between exp 1 or exp 2
 		choice = rnd.randint(1,2)
@@ -100,21 +105,16 @@ for threshold in np.linspace(0,1,10):
 			s1 = G.subgraph([str(i) for i in inf_nodes_1])
 			s1_1 = G.subgraph([str(i) for i in inf_nodes_1_1])
 			
-			op1 = est_1(G, s1, s1_1)
-			op2 = est_2(G, s1, s1_1)
+			op[0] = est_0(G, s1, s1_1)
+			op[1] = est_1(G, s1, s1_1)
+			op[2] = est_2(G, s1, s1_1)
 
-			#2 cases
-			if op1 > threshold:
-				FN1 += 1
-			else:
-				TP1 += 1
-
-			if op2 > threshold:
-				FN2 += 1
-			else:
-				TP2 += 1
-
-
+			for i in range(n_est):
+				if op[i] > threshold:
+					TP[i] += 1
+				elif op[i] < threshold:
+					FN[i] += 1
+			
 		else:
 			source_1 = generate_source(to_int(nx_graph_to_adj(G)), liss)
 			source_2 = generate_source(to_int(nx_graph_to_adj(G)), liss)
@@ -125,28 +125,27 @@ for threshold in np.linspace(0,1,10):
 			s1 = G.subgraph([str(i) for i in inf_nodes_1])
 			s2 = G.subgraph([str(i) for i in inf_nodes_2])
 
-			op1 = est_1(G, s1, s2)
-			op2 = est_2(G, s1, s2)
+			op[0] = est_0(G, s1, s2)
+			op[1] = est_1(G, s1, s2)
+			op[2] = est_2(G, s1, s2)
 
-			#2 cases
-			if op1 > threshold:
-				TN1 += 1
-			else:
-				FP1 += 1
+			for i in range(n_est):
+				if op[i] > threshold:
+					FP[i] += 1
+				elif op[i] < threshold:
+					TN[i] += 1
 
-			if op2 > threshold:
-				TN2 += 1
-			else:
-				FP2 += 1
+	for i in range(n_est):
+		tpr[i] += [TP[i]/(TP[i]+FN[i])]
+		fpr[i] += [FP[i]/(TN[i]+FP[i])]
+	
+plt.plot([0,1], [0,1], 'b--')
 
-	tpr_1 += [TP1/(TP1+FN1)]
-	fpr_1 += [FP1/(TN1+FP1)]
+colors = ['g','r','c','m','y','k']
+markers = ['o','v','^','<','>','*']
 
-	tpr_2 += [TP2/(TP2+FN2)]
-	fpr_2 += [FP2/(TN2+FP2)]
+for i in range(n_est):
+	plt.plot(fpr[i], tpr[i], ''.join(colors[i] + markers[i]))
 
-plt.plot([0,1], [0,1], 'b-')
-plt.plot(tpr_1, fpr_1, 'r-') 
-plt.plot(tpr_2, fpr_2, 'y--')
 plt.axis([0,1,0,1])
 plt.show()
