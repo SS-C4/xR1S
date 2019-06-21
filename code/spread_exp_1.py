@@ -62,35 +62,91 @@ for i in range(1, R):
 	else:
 		liss += [z_nei[2] + i - 3]
 
-source_1 = generate_source(to_int(nx_graph_to_adj(G)), liss)
-source_2 = generate_source(to_int(nx_graph_to_adj(G)), liss)
-
 #Stop after k infections in total (including source)
-k = 8
+k = 30
 
 if k > G.number_of_nodes():
 	k = G.number_of_nodes()
 
 #1 & 1_1 are exp_1 
 #1 & 2 are exp_2
-
-adj1, inf_nodes_1 = si_model_rumor_spreading(source_1, to_int(nx_graph_to_adj(G)), k)
-adj1_1, inf_nodes_1_1 = si_model_rumor_spreading(source_1, to_int(nx_graph_to_adj(G)), k)
-adj2, inf_nodes_2 = si_model_rumor_spreading(source_2, to_int(nx_graph_to_adj(G)), k)
-
-print(inf_nodes_1, inf_nodes_1_1, inf_nodes_2)
-
-s1 = G.subgraph([str(i) for i in inf_nodes_1])
-s1_1 = G.subgraph([str(i) for i in inf_nodes_1_1])
-s2 = G.subgraph([str(i) for i in inf_nodes_2])
-
 #Less than threshold = diff
 #More than threshold = same
 
-#Estimator 1 -> (s1 ^ s2) / (s1*s2 - s1 ^ s2)
-threshold = 0.4
+#Run experiments
+N = 100
 
-same = est_1(G, s1, s1_1)
-diff = est_1(G, s1, s2)
+#positive = same
+#negative = diff
+tpr_1 = [] 
+fpr_1 = []
+tpr_2 = []
+fpr_2 = []
 
-#still not complete
+for threshold in np.linspace(0,1,10):
+	FP1 = FN1 = TP1 = TN1 = 0
+	FP2 = FN2 = TP2 = TN2 = 0
+	
+	for i in range(N):
+		#choose between exp 1 or exp 2
+		choice = rnd.randint(1,2)
+
+		if choice == 1:
+			source_1 = generate_source(to_int(nx_graph_to_adj(G)), liss)
+
+			adj1, inf_nodes_1 = si_model_rumor_spreading(source_1, to_int(nx_graph_to_adj(G)), k)
+			adj1_1, inf_nodes_1_1 = si_model_rumor_spreading(source_1, to_int(nx_graph_to_adj(G)), k)
+
+			s1 = G.subgraph([str(i) for i in inf_nodes_1])
+			s1_1 = G.subgraph([str(i) for i in inf_nodes_1_1])
+			
+			op1 = est_1(G, s1, s1_1)
+			op2 = est_2(G, s1, s1_1)
+
+			#2 cases
+			if op1 > threshold:
+				FN1 += 1
+			else:
+				TP1 += 1
+
+			if op2 > threshold:
+				FN2 += 1
+			else:
+				TP2 += 1
+
+
+		else:
+			source_1 = generate_source(to_int(nx_graph_to_adj(G)), liss)
+			source_2 = generate_source(to_int(nx_graph_to_adj(G)), liss)
+
+			adj1, inf_nodes_1 = si_model_rumor_spreading(source_1, to_int(nx_graph_to_adj(G)), k)
+			adj2, inf_nodes_2 = si_model_rumor_spreading(source_2, to_int(nx_graph_to_adj(G)), k)
+
+			s1 = G.subgraph([str(i) for i in inf_nodes_1])
+			s2 = G.subgraph([str(i) for i in inf_nodes_2])
+
+			op1 = est_1(G, s1, s2)
+			op2 = est_2(G, s1, s2)
+
+			#2 cases
+			if op1 > threshold:
+				TN1 += 1
+			else:
+				FP1 += 1
+
+			if op2 > threshold:
+				TN2 += 1
+			else:
+				FP2 += 1
+
+	tpr_1 += [TP1/(TP1+FN1)]
+	fpr_1 += [FP1/(TN1+FP1)]
+
+	tpr_2 += [TP2/(TP2+FN2)]
+	fpr_2 += [FP2/(TN2+FP2)]
+
+plt.plot([0,1], [0,1], 'b-')
+plt.plot(tpr_1, fpr_1, 'r-') 
+plt.plot(tpr_2, fpr_2, 'y--')
+plt.axis([0,1,0,1])
+plt.show()
