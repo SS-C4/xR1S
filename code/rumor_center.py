@@ -152,7 +152,11 @@ def RC_values(who_infected, loc):
     up_messages = rumor_centrality_up(up_messages,who_infected,initial_node,initial_node)
     down_messages = rumor_centrality_down(down_messages,up_messages,who_infected,initial_node,initial_node)
     
-    scale = (numpy.math.factorial(up_messages[loc])) / (numpy.prod(up_messages))
+    pr = numpy.prod(up_messages)
+    if pr == 0:
+        scale = 1
+    else:
+        scale = (numpy.math.factorial(up_messages[loc])) / pr
 
     vals = [(i, j*scale) for i, j in enumerate(down_messages)]
     return vals

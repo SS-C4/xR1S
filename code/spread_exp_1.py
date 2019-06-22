@@ -8,7 +8,7 @@ from estimators import *
 
 
 #Restrict source to set R -> The first R nodes closest to the center
-R = 5
+R = 15
 
 def si_model_rumor_spreading(source, adjacency, N):
     infctn_pattern = [-1]*N;
@@ -54,7 +54,7 @@ for i in range(1, R):
 		liss += [z_nei[2] + i - 3]
 
 #Stop after k infections in total (including source)
-k = 40
+k = 100
 
 if k > G.number_of_nodes():
 	k = G.number_of_nodes()
@@ -68,7 +68,7 @@ if k > G.number_of_nodes():
 n_est = 5
 
 #Run experiments
-N = 1000
+N = 2000
 
 #positive = same = More than threshold
 #negative = diff = Less than threshold
