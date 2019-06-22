@@ -74,10 +74,10 @@ if k > G.number_of_nodes():
 #More than threshold = same
 
 #Number of estimators
-n_est = 3
+n_est = 5
 
 #Run experiments
-N = 1000
+N = 500
 
 #positive = same = More than threshold
 #negative = diff = Less than threshold
@@ -108,6 +108,8 @@ for threshold in np.linspace(0,1,100):
 			op[0] = est_0(G, s1, s1_1)
 			op[1] = est_1(G, s1, s1_1)
 			op[2] = est_2(G, s1, s1_1)
+			op[3] = est_3(G, s1, s1_1)
+			op[4] = est_4(G, s1, s1_1)
 
 			for i in range(n_est):
 				if op[i] > threshold:
@@ -128,6 +130,8 @@ for threshold in np.linspace(0,1,100):
 			op[0] = est_0(G, s1, s2)
 			op[1] = est_1(G, s1, s2)
 			op[2] = est_2(G, s1, s2)
+			op[3] = est_3(G, s1, s2)
+			op[4] = est_4(G, s1, s2)
 
 			for i in range(n_est):
 				if op[i] > threshold:
