@@ -10,15 +10,6 @@ from estimators import *
 #Restrict source to set R -> The first R nodes closest to the center
 R = 5
 
-#list_of_source is the set of nodes which can be possible sources
-def generate_source(adjacency, list_of_sources):
-    num_nodes = len(adjacency)
-    while True:
-        source = rnd.choice(list_of_sources)
-        if len(adjacency[source]) > 0:
-            break
-    return source
-
 def si_model_rumor_spreading(source, adjacency, N):
     infctn_pattern = [-1]*N;
     who_infected = [[] for i in range(N)]
@@ -63,7 +54,7 @@ for i in range(1, R):
 		liss += [z_nei[2] + i - 3]
 
 #Stop after k infections in total (including source)
-k = 30
+k = 40
 
 if k > G.number_of_nodes():
 	k = G.number_of_nodes()
@@ -77,7 +68,7 @@ if k > G.number_of_nodes():
 n_est = 5
 
 #Run experiments
-N = 500
+N = 1000
 
 #positive = same = More than threshold
 #negative = diff = Less than threshold
@@ -97,7 +88,7 @@ for threshold in np.linspace(0,1,100):
 		choice = rnd.randint(1,2)
 
 		if choice == 1:
-			source_1 = generate_source(to_int(nx_graph_to_adj(G)), liss)
+			source_1 = int(rnd.choice(liss))
 
 			adj1, inf_nodes_1 = si_model_rumor_spreading(source_1, to_int(nx_graph_to_adj(G)), k)
 			adj1_1, inf_nodes_1_1 = si_model_rumor_spreading(source_1, to_int(nx_graph_to_adj(G)), k)
@@ -118,8 +109,8 @@ for threshold in np.linspace(0,1,100):
 					FN[i] += 1
 			
 		else:
-			source_1 = generate_source(to_int(nx_graph_to_adj(G)), liss)
-			source_2 = generate_source(to_int(nx_graph_to_adj(G)), liss)
+			source_1 = int(rnd.choice(liss))
+			source_2 = int(rnd.choice(liss))
 
 			adj1, inf_nodes_1 = si_model_rumor_spreading(source_1, to_int(nx_graph_to_adj(G)), k)
 			adj2, inf_nodes_2 = si_model_rumor_spreading(source_2, to_int(nx_graph_to_adj(G)), k)

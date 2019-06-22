@@ -53,14 +53,21 @@ def est_3(G, s1, s2):
 		for j in s2.nodes():
 			if i == j:
 				h.append(i)
-	loc_1 = rumor_center(to_int(nx_graph_to_adj(s1)))
-	vals_s1 = RC_values(to_int(nx_graph_to_adj(s1)), loc_1)
+	
+	#map to 0..(s1_num-1)
+	mapdict_1 = {j : i for i,j in enumerate([i for i in s1.nodes()])}
+	mapdict_2 = {j : i for i,j in enumerate([i for i in s2.nodes()])}
+	a1 = nx.relabel_nodes(s1, mapdict_1)
+	a2 = nx.relabel_nodes(s2, mapdict_2)
 
-	loc_2 = rumor_center(to_int(nx_graph_to_adj(s2)))
-	vals_s2 = RC_values(to_int(nx_graph_to_adj(s2)), loc_2)
+	loc_1 = rumor_center(to_int(nx_graph_to_adj(a1)))
+	vals_s1 = RC_values(to_int(nx_graph_to_adj(a1)), loc_1)
+
+	loc_2 = rumor_center(to_int(nx_graph_to_adj(a2)))
+	vals_s2 = RC_values(to_int(nx_graph_to_adj(a2)), loc_2)
 
 	for i in h:
-		num += vals_s1[int(i)][1] * vals_s2[int(i)][1]
+		num += vals_s1[list(mapdict_1.keys()).index(i)][1] * vals_s2[list(mapdict_2.keys()).index(i)][1]
 
 	denom = sum([j for (i,j) in vals_s1])*sum([j for (i,j) in vals_s2]) - num
 
