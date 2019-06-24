@@ -9,11 +9,11 @@ from estimators import *
 #Restrict source to set R -> The first R nodes closest to the center
 R = 20
 #Stop after k infections in total (including source)
-k = 10
+k = 100
 #Number of estimators
 n_est = 5
 #Run experiments
-N = 200
+N = 4000
 #Number of divisions of [0,1] for threshold values
 n_div = 100
 
