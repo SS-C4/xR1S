@@ -13,7 +13,7 @@ k = 10
 #Number of estimators
 n_est = 5
 #Run experiments
-N = 200
+N = 4000
 #Number of divisions of [0,1] for threshold values
 n_div = 100
 
