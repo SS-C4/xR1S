@@ -2,9 +2,9 @@ from __future__ import division
 import matplotlib.pyplot as plt
 import random as rnd
 import networkx as nx
-from rumor_center import *
 from estimators import *
-
+import numpy as np
+import pyximport; pyximport.install()
 
 #Restrict source to set R -> The first R nodes closest to the center
 R = 20
@@ -18,31 +18,31 @@ N = 4000
 n_div = 100
 
 def si_model_rumor_spreading(source, adjacency, N):
-    infctn_pattern = [-1]*N;
+	infctn_pattern = [-1]*N;
 
-    # adding the source node to the list of infected nodes
-    infctn_pattern[0] = source
-    susceptible_nodes = adjacency[source]
-    susceptible_indices = [0]*len(susceptible_nodes)
+	# adding the source node to the list of infected nodes
+	infctn_pattern[0] = source
+	susceptible_nodes = adjacency[source]
+	susceptible_indices = [0]*len(susceptible_nodes)
 
-    for i in range(1,N):
+	for i in range(1,N):
 
-        # infect the first node
-        infctd_node_idx = rnd.randrange(0,len(susceptible_nodes),1)
-        infctn_pattern[i] = susceptible_nodes[infctd_node_idx]
+		# infect the first node
+		infctd_node_idx = rnd.randrange(0,len(susceptible_nodes),1)
+		infctn_pattern[i] = susceptible_nodes[infctd_node_idx]
 
-        # updating susceptible_nodes and susceptible_indices
-        susceptible_indices = [susceptible_indices[j] for j in range(len(susceptible_nodes)) if susceptible_nodes[j]
-                               != susceptible_nodes[infctd_node_idx]]
-        susceptible_nodes = [susceptible_nodes[j] for j in range(len(susceptible_nodes)) if susceptible_nodes[j]
-                             != susceptible_nodes[infctd_node_idx]]
-        infctd_nodes = set(infctn_pattern[:i+1])
-        new_susceptible_nodes = set(adjacency[infctn_pattern[i]])
-        new_susceptible_nodes = list(new_susceptible_nodes.difference(infctd_nodes))
-        susceptible_nodes  = susceptible_nodes  + new_susceptible_nodes
-        susceptible_indices = susceptible_indices + [i]*len(new_susceptible_nodes)
+		# updating susceptible_nodes and susceptible_indices
+		susceptible_indices = [susceptible_indices[j] for j in range(len(susceptible_nodes)) if susceptible_nodes[j]
+							   != susceptible_nodes[infctd_node_idx]]
+		susceptible_nodes = [susceptible_nodes[j] for j in range(len(susceptible_nodes)) if susceptible_nodes[j]
+							 != susceptible_nodes[infctd_node_idx]]
+		infctd_nodes = set(infctn_pattern[:i+1])
+		new_susceptible_nodes = set(adjacency[infctn_pattern[i]])
+		new_susceptible_nodes = list(new_susceptible_nodes.difference(infctd_nodes))
+		susceptible_nodes  = susceptible_nodes  + new_susceptible_nodes
+		susceptible_indices = susceptible_indices + [i]*len(new_susceptible_nodes)
 
-    return infctn_pattern
+	return infctn_pattern
 
 G = nx.read_adjlist("large")
 
@@ -60,14 +60,14 @@ if k > G.number_of_nodes():
 tpr = [[] for i in range(n_est)]
 fpr = [[] for i in range(n_est)]
 
-for threshold in np.linspace(0,1,n_div):
-	FP = [0 for i in range(n_est)]
-	TP = [0 for i in range(n_est)]
-	FN = [0 for i in range(n_est)]
-	TN = [0 for i in range(n_est)]
+op = np.zeros(n_est, dtype = float)
 
-	op = [0 for i in range(n_est)]
+FP = np.zeros((n_div,n_est), dtype = int)
+TP = np.zeros((n_div,n_est), dtype = int)
+FN = np.zeros((n_div,n_est), dtype = int)
+TN = np.zeros((n_div,n_est), dtype = int)
 
+for n_thr, threshold in enumerate(np.linspace(0,1,n_div)):
 	for i in range(N):
 		#choose between exp 1 or exp 2
 		choice = rnd.randint(1,2)
@@ -86,11 +86,11 @@ for threshold in np.linspace(0,1,n_div):
 			op[3] = est_3(s1, s1_1)
 			op[4] = est_4(s1, s1_1)
 
-			for i in range(n_est):
-				if op[i] > threshold:
-					TP[i] += 1
+			for j in range(n_est):
+				if op[j] > threshold:
+					TP[n_thr][j] += 1
 				else:
-					FN[i] += 1
+					FN[n_thr][j] += 1
 
 		else:
 			source_1 = int(rnd.choice(liss))
@@ -108,15 +108,14 @@ for threshold in np.linspace(0,1,n_div):
 			op[3] = est_3(s1, s2)
 			op[4] = est_4(s1, s2)
 
-			for i in range(n_est):
-				if op[i] > threshold:
-					FP[i] += 1
+			for j in range(n_est):
+				if op[j] > threshold:
+					FP[n_thr][j] += 1
 				else:
-					TN[i] += 1
-
+					TN[n_thr][j] += 1
 	for i in range(n_est):
-		tpr[i] += [TP[i]/(TP[i]+FN[i])]
-		fpr[i] += [FP[i]/(TN[i]+FP[i])]
+		tpr[i] += [TP[n_thr][i]/(TP[n_thr][i]+FN[n_thr][i])]
+		fpr[i] += [FP[n_thr][i]/(TN[n_thr][i]+FP[n_thr][i])]
 
 plt.plot([0,1], [0,1], 'b--')
 
