@@ -1,7 +1,7 @@
 from rumor_center import *
 
 #Estimator 0 -> s1^s2 / s1*s2 - s1^s2
-def est_0(G, s1, s2):
+def est_0(s1, s2):
 	s1_num = s1.number_of_nodes()
 	s2_num = s2.number_of_nodes()
 
@@ -15,7 +15,7 @@ def est_0(G, s1, s2):
 	return (float( normal_fact * ov_num / (s1_num*s2_num - ov_num) ))
 
 #Estimator 1 -> s1^s2 / min(s1,s2)
-def est_1(G, s1, s2):
+def est_1(s1, s2):
 	s1_num = s1.number_of_nodes()
 	s2_num = s2.number_of_nodes()
 
@@ -29,7 +29,7 @@ def est_1(G, s1, s2):
 	return (float( ov_num / min(s1_num, s2_num) ))
 
 #Estimator 2 -> s1^s2 / s1vs2
-def est_2(G, s1, s2):
+def est_2(s1, s2):
 	s1_num = s1.number_of_nodes()
 	s2_num = s2.number_of_nodes()
 
@@ -43,7 +43,7 @@ def est_2(G, s1, s2):
 	return (float( ov_num / (s1_num + s2_num - ov_num)))
 
 #ML Estimator 3 -> Likelihood ratio
-def est_3(G, s1, s2):
+def est_3(s1, s2):
 	s1_num = s1.number_of_nodes()
 	s2_num = s2.number_of_nodes()
 
@@ -74,7 +74,7 @@ def est_3(G, s1, s2):
 	return (float(num/denom))
 
 #Estimator 4 -> Overlap ratio / number of connected components
-def est_4(G, s1, s2):
+def est_4(s1, s2):
 	s1_num = s1.number_of_nodes()
 	s2_num = s2.number_of_nodes()
 

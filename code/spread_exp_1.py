@@ -1,6 +1,5 @@
 from __future__ import division
 import matplotlib.pyplot as plt
-from pylab import *
 import random as rnd
 import networkx as nx
 from rumor_center import *
@@ -10,17 +9,16 @@ from estimators import *
 #Restrict source to set R -> The first R nodes closest to the center
 R = 20
 #Stop after k infections in total (including source)
-k = 100
+k = 10
 #Number of estimators
 n_est = 5
 #Run experiments
-N = 4000
+N = 200
 #Number of divisions of [0,1] for threshold values
 n_div = 100
 
 def si_model_rumor_spreading(source, adjacency, N):
     infctn_pattern = [-1]*N;
-    who_infected = [[] for i in range(N)]
 
     # adding the source node to the list of infected nodes
     infctn_pattern[0] = source
@@ -32,8 +30,6 @@ def si_model_rumor_spreading(source, adjacency, N):
         # infect the first node
         infctd_node_idx = rnd.randrange(0,len(susceptible_nodes),1)
         infctn_pattern[i] = susceptible_nodes[infctd_node_idx]
-        who_infected[i] = [susceptible_indices[infctd_node_idx]]
-        who_infected[susceptible_indices[infctd_node_idx]].append(i)
 
         # updating susceptible_nodes and susceptible_indices
         susceptible_indices = [susceptible_indices[j] for j in range(len(susceptible_nodes)) if susceptible_nodes[j]
@@ -46,20 +42,11 @@ def si_model_rumor_spreading(source, adjacency, N):
         susceptible_nodes  = susceptible_nodes  + new_susceptible_nodes
         susceptible_indices = susceptible_indices + [i]*len(new_susceptible_nodes)
 
-    return who_infected, infctn_pattern
+    return infctn_pattern
 
 G = nx.read_adjlist("large")
 
-liss = [0]
-z_nei = [int(i) for i in G.neighbors('0')]
-
-for i in range(1, R):
-	if i % 3 == 1:
-		liss += [i]
-	elif i % 3 == 2:
-		liss += [z_nei[1] + i - 2]
-	else:
-		liss += [z_nei[2] + i - 3]
+liss = [i for i in range(R)]
 
 if k > G.number_of_nodes():
 	k = G.number_of_nodes()
@@ -87,44 +74,44 @@ for threshold in np.linspace(0,1,n_div):
 		if choice == 1:
 			source_1 = int(rnd.choice(liss))
 
-			adj1, inf_nodes_1 = si_model_rumor_spreading(source_1, to_int(nx_graph_to_adj(G)), k)
-			adj1_1, inf_nodes_1_1 = si_model_rumor_spreading(source_1, to_int(nx_graph_to_adj(G)), k)
+			inf_nodes_1 = si_model_rumor_spreading(source_1, to_int(nx_graph_to_adj(G)), k)
+			inf_nodes_1_1 = si_model_rumor_spreading(source_1, to_int(nx_graph_to_adj(G)), k)
 
 			s1 = G.subgraph([str(i) for i in inf_nodes_1])
 			s1_1 = G.subgraph([str(i) for i in inf_nodes_1_1])
 
-			op[0] = est_0(G, s1, s1_1)
-			op[1] = est_1(G, s1, s1_1)
-			op[2] = est_2(G, s1, s1_1)
-			op[3] = est_3(G, s1, s1_1)
-			op[4] = est_4(G, s1, s1_1)
+			op[0] = est_0(s1, s1_1)
+			op[1] = est_1(s1, s1_1)
+			op[2] = est_2(s1, s1_1)
+			op[3] = est_3(s1, s1_1)
+			op[4] = est_4(s1, s1_1)
 
 			for i in range(n_est):
 				if op[i] > threshold:
 					TP[i] += 1
-				elif op[i] < threshold:
+				else:
 					FN[i] += 1
 
 		else:
 			source_1 = int(rnd.choice(liss))
 			source_2 = int(rnd.choice(liss))
 
-			adj1, inf_nodes_1 = si_model_rumor_spreading(source_1, to_int(nx_graph_to_adj(G)), k)
-			adj2, inf_nodes_2 = si_model_rumor_spreading(source_2, to_int(nx_graph_to_adj(G)), k)
+			inf_nodes_1 = si_model_rumor_spreading(source_1, to_int(nx_graph_to_adj(G)), k)
+			inf_nodes_2 = si_model_rumor_spreading(source_2, to_int(nx_graph_to_adj(G)), k)
 
 			s1 = G.subgraph([str(i) for i in inf_nodes_1])
 			s2 = G.subgraph([str(i) for i in inf_nodes_2])
 
-			op[0] = est_0(G, s1, s2)
-			op[1] = est_1(G, s1, s2)
-			op[2] = est_2(G, s1, s2)
-			op[3] = est_3(G, s1, s2)
-			op[4] = est_4(G, s1, s2)
+			op[0] = est_0(s1, s2)
+			op[1] = est_1(s1, s2)
+			op[2] = est_2(s1, s2)
+			op[3] = est_3(s1, s2)
+			op[4] = est_4(s1, s2)
 
 			for i in range(n_est):
 				if op[i] > threshold:
 					FP[i] += 1
-				elif op[i] < threshold:
+				else:
 					TN[i] += 1
 
 	for i in range(n_est):
