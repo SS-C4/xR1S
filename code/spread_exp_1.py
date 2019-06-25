@@ -5,7 +5,9 @@ import networkx as nx
 from estimators import *
 import numpy as np
 import pyximport; pyximport.install()
+import time
 
+t0 = time.time()
 #Restrict source to set R -> The first R nodes closest to the center
 R = 20
 #Stop after k infections in total (including source)
@@ -46,6 +48,9 @@ def si_model_rumor_spreading(source, adjacency, N):
 
 G = nx.read_adjlist("large")
 
+#Degree of underlying tree
+deg = len(G.edges('0'))
+
 liss = [i for i in range(R)]
 
 if k > G.number_of_nodes():
@@ -67,10 +72,14 @@ TP = np.zeros((n_div,n_est), dtype = int)
 FN = np.zeros((n_div,n_est), dtype = int)
 TN = np.zeros((n_div,n_est), dtype = int)
 
+#Populate array with random choices (1,2)
+rchoice = np.random.randint(1,3,N)
+
 for n_thr, threshold in enumerate(np.linspace(0,1,n_div)):
+	print (time.time() -t0)
 	for i in range(N):
 		#choose between exp 1 or exp 2
-		choice = rnd.randint(1,2)
+		choice = rchoice[i]
 		if choice == 1:
 			source_1 = int(rnd.choice(liss))
 
@@ -117,6 +126,8 @@ for n_thr, threshold in enumerate(np.linspace(0,1,n_div)):
 		tpr[i] += [TP[n_thr][i]/(TP[n_thr][i]+FN[n_thr][i])]
 		fpr[i] += [FP[n_thr][i]/(TN[n_thr][i]+FP[n_thr][i])]
 
+print (time.time() - t0)
+
 plt.plot([0,1], [0,1], 'b--')
 
 colors = ['g','r','c','m','y','k']
@@ -126,5 +137,5 @@ for i in range(n_est):
 	plt.plot(fpr[i], tpr[i], ''.join(colors[i] + markers[i]))
 
 plt.axis([0,1,0,1])
-plt.text(0.7, 0.4, "R: "+str(R) + "\nn_div: "+str(n_div) + "\nN: "+str(N) + "\nk: "+str(k))
+plt.text(0.7, 0.4, "R: "+str(R) + "\nn_div: "+str(n_div) + "\nN: "+str(N) + "\nk: "+str(k) + "\ndeg: "+str(deg))
 plt.show()
