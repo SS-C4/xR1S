@@ -9,15 +9,15 @@ import time
 
 t0 = time.time()
 #Restrict source to set R -> The first R nodes closest to the center
-R = 20
+R = 15
 #Stop after k infections in total (including source)
-k = 100
+k = 80
 #Number of estimators
 n_est = 5
 #Run experiments
-N = 4000
+N = 5000
 #Number of divisions of [0,1] for threshold values
-n_div = 100
+n_div = 300
 
 def si_model_rumor_spreading(source, adjacency, N):
 	infctn_pattern = [-1]*N;
@@ -65,7 +65,7 @@ if k > G.number_of_nodes():
 tpr = [[] for i in range(n_est)]
 fpr = [[] for i in range(n_est)]
 
-op = np.zeros(n_est, dtype = float)
+op = [0 for i in range(n_est)]
 
 FP = np.zeros((n_div,n_est), dtype = int)
 TP = np.zeros((n_div,n_est), dtype = int)
@@ -77,8 +77,6 @@ rchoice = np.random.randint(1,3,N)
 
 #Run exp N times
 for i in range(N):
-	if (i % 40 == 0):
-		print (time.time() - t0)
 	#choose between exp 1 or exp 2
 	choice = rchoice[i]
 	if choice == 1:
@@ -142,5 +140,6 @@ for i in range(n_est):
 	plt.plot(fpr[i], tpr[i], ''.join(colors[i] + markers[i]))
 
 plt.axis([0,1,0,1])
-plt.text(0.7, 0.4, "R: "+str(R) + "\nn_div: "+str(n_div) + "\nN: "+str(N) + "\nk: "+str(k) + "\ndeg: "+str(deg))
-plt.show()
+plt.text(0.7, 0.4, "R: "+str(R) + "\nn_div: "+str(n_div) + "\nN: "+str(N) + "\nk: "+str(k) + "\ndeg: "+str(deg)\
+	 +"\n\n\n\nML est is purple")
+plt.savefig("../../tmp/"+str(R)+"_"+str(n_div)+"_"+str(N)+"_"+str(k)+"_"+str(deg))
