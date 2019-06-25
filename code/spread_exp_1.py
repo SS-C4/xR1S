@@ -75,53 +75,58 @@ TN = np.zeros((n_div,n_est), dtype = int)
 #Populate array with random choices (1,2)
 rchoice = np.random.randint(1,3,N)
 
-for n_thr, threshold in enumerate(np.linspace(0,1,n_div)):
-	print (time.time() -t0)
-	for i in range(N):
-		#choose between exp 1 or exp 2
-		choice = rchoice[i]
-		if choice == 1:
-			source_1 = int(rnd.choice(liss))
+#Run exp N times
+for i in range(N):
+	if (i % 40 == 0):
+		print (time.time() - t0)
+	#choose between exp 1 or exp 2
+	choice = rchoice[i]
+	if choice == 1:
+		source_1 = int(rnd.choice(liss))
 
-			inf_nodes_1 = si_model_rumor_spreading(source_1, to_int(nx_graph_to_adj(G)), k)
-			inf_nodes_1_1 = si_model_rumor_spreading(source_1, to_int(nx_graph_to_adj(G)), k)
+		inf_nodes_1 = si_model_rumor_spreading(source_1, to_int(nx_graph_to_adj(G)), k)
+		inf_nodes_1_1 = si_model_rumor_spreading(source_1, to_int(nx_graph_to_adj(G)), k)
 
-			s1 = G.subgraph([str(i) for i in inf_nodes_1])
-			s1_1 = G.subgraph([str(i) for i in inf_nodes_1_1])
+		s1 = G.subgraph([str(i) for i in inf_nodes_1])
+		s1_1 = G.subgraph([str(i) for i in inf_nodes_1_1])
 
-			op[0] = est_0(s1, s1_1)
-			op[1] = est_1(s1, s1_1)
-			op[2] = est_2(s1, s1_1)
-			op[3] = est_3(s1, s1_1)
-			op[4] = est_4(s1, s1_1)
+		op[0] = est_0(s1, s1_1)
+		op[1] = est_1(s1, s1_1)
+		op[2] = est_2(s1, s1_1)
+		op[3] = est_3(s1, s1_1)
+		op[4] = est_4(s1, s1_1)
 
+		for n_thr, threshold in enumerate(np.linspace(0,1,n_div)):
 			for j in range(n_est):
 				if op[j] > threshold:
 					TP[n_thr][j] += 1
 				else:
 					FN[n_thr][j] += 1
 
-		else:
-			source_1 = int(rnd.choice(liss))
-			source_2 = int(rnd.choice(liss))
+	else:
+		source_1 = int(rnd.choice(liss))
+		source_2 = int(rnd.choice(liss))
 
-			inf_nodes_1 = si_model_rumor_spreading(source_1, to_int(nx_graph_to_adj(G)), k)
-			inf_nodes_2 = si_model_rumor_spreading(source_2, to_int(nx_graph_to_adj(G)), k)
+		inf_nodes_1 = si_model_rumor_spreading(source_1, to_int(nx_graph_to_adj(G)), k)
+		inf_nodes_2 = si_model_rumor_spreading(source_2, to_int(nx_graph_to_adj(G)), k)
 
-			s1 = G.subgraph([str(i) for i in inf_nodes_1])
-			s2 = G.subgraph([str(i) for i in inf_nodes_2])
+		s1 = G.subgraph([str(i) for i in inf_nodes_1])
+		s2 = G.subgraph([str(i) for i in inf_nodes_2])
 
-			op[0] = est_0(s1, s2)
-			op[1] = est_1(s1, s2)
-			op[2] = est_2(s1, s2)
-			op[3] = est_3(s1, s2)
-			op[4] = est_4(s1, s2)
+		op[0] = est_0(s1, s2)
+		op[1] = est_1(s1, s2)
+		op[2] = est_2(s1, s2)
+		op[3] = est_3(s1, s2)
+		op[4] = est_4(s1, s2)
 
+		for n_thr, threshold in enumerate(np.linspace(0,1,n_div)):
 			for j in range(n_est):
 				if op[j] > threshold:
 					FP[n_thr][j] += 1
 				else:
 					TN[n_thr][j] += 1
+
+for n_thr, threshold in enumerate(np.linspace(0,1,n_div)):
 	for i in range(n_est):
 		tpr[i] += [TP[n_thr][i]/(TP[n_thr][i]+FN[n_thr][i])]
 		fpr[i] += [FP[n_thr][i]/(TN[n_thr][i]+FP[n_thr][i])]
