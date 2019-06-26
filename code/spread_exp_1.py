@@ -9,15 +9,15 @@ import time
 
 t0 = time.time()
 #Restrict source to set R -> The first R nodes closest to the center
-R = 15
+R = 10
 #Stop after k infections in total (including source)
 k = 80
 #Number of estimators
 n_est = 5
 #Run experiments
-N = 5000
+N = 4000
 #Number of divisions of [0,1] for threshold values
-n_div = 300
+n_div = 200
 
 def si_model_rumor_spreading(source, adjacency, N):
 	infctn_pattern = [-1]*N;
@@ -91,7 +91,7 @@ for i in range(N):
 		op[0] = est_0(s1, s1_1)
 		op[1] = est_1(s1, s1_1)
 		op[2] = est_2(s1, s1_1)
-		op[3] = est_3(s1, s1_1)
+		op[3] = est_3(R, s1, s1_1)
 		op[4] = est_4(s1, s1_1)
 
 		for n_thr, threshold in enumerate(np.linspace(0,1,n_div)):
@@ -114,7 +114,7 @@ for i in range(N):
 		op[0] = est_0(s1, s2)
 		op[1] = est_1(s1, s2)
 		op[2] = est_2(s1, s2)
-		op[3] = est_3(s1, s2)
+		op[3] = est_3(R, s1, s2)
 		op[4] = est_4(s1, s2)
 
 		for n_thr, threshold in enumerate(np.linspace(0,1,n_div)):
