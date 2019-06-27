@@ -9,15 +9,15 @@ import time
 
 t0 = time.time()
 #Restrict source to set R -> The first R nodes closest to the center
-R = 10
+R = 2
 #Stop after k infections in total (including source)
-k = 80
+k = 3
 #Number of estimators
 n_est = 5
 #Run experiments
-N = 4000
-#Number of divisions of [0,1] for threshold values
-n_div = 200
+N = 5000
+#Number of divisions of [0,3] for threshold values
+n_div = 297
 
 def si_model_rumor_spreading(source, adjacency, N):
 	infctn_pattern = [-1]*N;
@@ -58,10 +58,8 @@ if k > G.number_of_nodes():
 
 #1 & 1_1 are exp_1
 #1 & 2 are exp_2
-#Less than threshold = diff
-#More than threshold = same
-#positive = same = More than threshold
-#negative = diff = Less than threshold
+#positive = same = Should be more than threshold
+#negative = diff = Should be less than threshold
 tpr = [[] for i in range(n_est)]
 fpr = [[] for i in range(n_est)]
 
@@ -74,6 +72,7 @@ TN = np.zeros((n_div,n_est), dtype = int)
 
 #Populate array with random choices (1,2)
 rchoice = np.random.randint(1,3,N)
+print (np.count_nonzero(rchoice == 1))
 
 #Run exp N times
 for i in range(N):
@@ -94,9 +93,9 @@ for i in range(N):
 		op[3] = est_3(R, s1, s1_1)
 		op[4] = est_4(s1, s1_1)
 
-		for n_thr, threshold in enumerate(np.linspace(0,1,n_div)):
+		for n_thr, threshold in enumerate(np.linspace(0,3,n_div)):
 			for j in range(n_est):
-				if op[j] > threshold:
+				if op[j] >= threshold:
 					TP[n_thr][j] += 1
 				else:
 					FN[n_thr][j] += 1
@@ -117,14 +116,14 @@ for i in range(N):
 		op[3] = est_3(R, s1, s2)
 		op[4] = est_4(s1, s2)
 
-		for n_thr, threshold in enumerate(np.linspace(0,1,n_div)):
+		for n_thr, threshold in enumerate(np.linspace(0,3,n_div)):
 			for j in range(n_est):
-				if op[j] > threshold:
+				if op[j] >= threshold:
 					FP[n_thr][j] += 1
 				else:
 					TN[n_thr][j] += 1
 
-for n_thr, threshold in enumerate(np.linspace(0,1,n_div)):
+for n_thr, threshold in enumerate(np.linspace(0,3,n_div)):
 	for i in range(n_est):
 		tpr[i] += [TP[n_thr][i]/(TP[n_thr][i]+FN[n_thr][i])]
 		fpr[i] += [FP[n_thr][i]/(TN[n_thr][i]+FP[n_thr][i])]
@@ -134,7 +133,7 @@ print (time.time() - t0)
 plt.plot([0,1], [0,1], 'b--')
 
 colors = ['g','r','c','m','y','k']
-markers = ['o','v','^','<','>','*']
+markers = ['-','-','v-','^--','-','-']
 
 for i in range(n_est):
 	plt.plot(fpr[i], tpr[i], ''.join(colors[i] + markers[i]))
