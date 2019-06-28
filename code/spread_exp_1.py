@@ -13,15 +13,15 @@ R = 20
 #Stop after k infections in total (including source)
 k = 100
 #Number of estimators
-n_est = 4
+n_est = 5
 #Run experiments
 N = 5000
 #Number of divisions of [0,3] for threshold values
 n_div = 201
 #Spread rate $\lambda$
 l = 1
-#T_max for taking snapshot
-T_max = 3
+#T_max for taking snapshot (Do not set above 5-10)
+T_max = 20
 
 #Gives size of snapshot after waiting for T_max
 def snap_size(deg, T_max):
@@ -66,8 +66,9 @@ deg = len(G.edges('0'))
 
 liss = [i for i in range(R)]
 
-m = snap_size(deg, T_max)
-n = snap_size(deg, T_max)
+#Sizes of snapshots
+m = k
+n = k
 
 #1 & 1_1 are exp_1
 #1 & 2 are exp_2
@@ -103,6 +104,7 @@ for i in range(N):
 		op[1] = est_1(s1, s1_1)
 		op[2] = est_2(s1, s1_1)
 		op[3] = est_3(R, s1, s1_1)
+		op[4] = est_4(s1, s1_1)
 
 		for n_thr, threshold in enumerate(np.linspace(0,3,n_div)):
 			for j in range(n_est):
@@ -125,6 +127,7 @@ for i in range(N):
 		op[1] = est_1(s1, s2)
 		op[2] = est_2(s1, s2)
 		op[3] = est_3(R, s1, s2)
+		op[4] = est_4(s1, s2)
 
 		for n_thr, threshold in enumerate(np.linspace(0,3,n_div)):
 			for j in range(n_est):

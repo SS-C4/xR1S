@@ -73,24 +73,21 @@ def est_3(R, s1, s2):
 
 	return (R*float(num/denom))
 
-#Estimator 4 -> Overlap ratio / number of connected components
+#Estimator 4 -> Comparing rumor centers
 def est_4(s1, s2):
 	s1_num = s1.number_of_nodes()
 	s2_num = s2.number_of_nodes()
 
-	ov_num = 0
-	for i in s1.nodes():
-		for j in s2.nodes():
-			if i == j:
-				ov_num += 1
-				break
+	#map to 0..(s1_num-1)
+	mapdict_1 = {j : i for i,j in enumerate([i for i in s1.nodes()])}
+	mapdict_2 = {j : i for i,j in enumerate([i for i in s2.nodes()])}
+	a1 = nx.relabel_nodes(s1, mapdict_1)
+	a2 = nx.relabel_nodes(s2, mapdict_2)
 	
-	if s1_num == max(s1_num, s2_num):
-		big = s1.copy()
-		big.remove_nodes_from(n for n in s1 if n in s2)
-	else:
-		big = s2.copy()
-		big.remove_nodes_from(n for n in s2 if n in s1)
+	loc_1 = rumor_center(to_int(nx_graph_to_adj(a1)))
+	loc_2 = rumor_center(to_int(nx_graph_to_adj(a2)))
+	
+	loc_1 = (list(mapdict_1.keys()))[int(loc_1)]
+	loc_2 = (list(mapdict_1.keys()))[int(loc_1)]
 
-	num_con = nx.algorithms.components.number_connected_components(big)
-	return (float(num_con * ov_num / (min(s1_num, s2_num)**2) ))
+	return (float(1 / (nx.shortest_path_length(s1, loc_1, loc_2)+1)))
