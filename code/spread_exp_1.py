@@ -18,6 +18,19 @@ n_est = 4
 N = 5000
 #Number of divisions of [0,3] for threshold values
 n_div = 201
+#Spread rate $\lambda$
+l = 1
+#T_max for taking snapshot
+T_max = 3
+
+#Gives size of snapshot after waiting for T_max
+def snap_size(deg, T_max):
+	T = 0
+	k = 1
+	while T <= T_max:
+		T += np.random.exponential(float(1/(l*deg + (k-1)*(deg-2))))
+		k += 1
+	return k
 
 def si_model_rumor_spreading(source, adjacency, N):
 	infctn_pattern = [-1]*N;
@@ -53,8 +66,8 @@ deg = len(G.edges('0'))
 
 liss = [i for i in range(R)]
 
-if k > G.number_of_nodes():
-	k = G.number_of_nodes()
+m = snap_size(deg, T_max)
+n = snap_size(deg, T_max)
 
 #1 & 1_1 are exp_1
 #1 & 2 are exp_2
@@ -80,8 +93,8 @@ for i in range(N):
 	if choice == 1:
 		source_1 = int(rnd.choice(liss))
 
-		inf_nodes_1 = si_model_rumor_spreading(source_1, to_int(nx_graph_to_adj(G)), k)
-		inf_nodes_1_1 = si_model_rumor_spreading(source_1, to_int(nx_graph_to_adj(G)), k)
+		inf_nodes_1 = si_model_rumor_spreading(source_1, to_int(nx_graph_to_adj(G)), m)
+		inf_nodes_1_1 = si_model_rumor_spreading(source_1, to_int(nx_graph_to_adj(G)), n)
 
 		s1 = G.subgraph([str(i) for i in inf_nodes_1])
 		s1_1 = G.subgraph([str(i) for i in inf_nodes_1_1])
@@ -102,8 +115,8 @@ for i in range(N):
 		source_1 = int(rnd.choice(liss))
 		source_2 = int(rnd.choice(liss))
 
-		inf_nodes_1 = si_model_rumor_spreading(source_1, to_int(nx_graph_to_adj(G)), k)
-		inf_nodes_2 = si_model_rumor_spreading(source_2, to_int(nx_graph_to_adj(G)), k)
+		inf_nodes_1 = si_model_rumor_spreading(source_1, to_int(nx_graph_to_adj(G)), m)
+		inf_nodes_2 = si_model_rumor_spreading(source_2, to_int(nx_graph_to_adj(G)), n)
 
 		s1 = G.subgraph([str(i) for i in inf_nodes_1])
 		s2 = G.subgraph([str(i) for i in inf_nodes_2])
@@ -137,5 +150,5 @@ for i in range(n_est):
 
 plt.axis([0,1,0,1])
 plt.text(0.7, 0.4, "R: "+str(R) + "\nn_div: "+str(n_div) + "\nN: "+str(N) + "\nk: "+str(k) + "\ndeg: "+str(deg)\
-	 +"\n\n\n\nML est is purple")
+	 + "\n(m,n): ("+str(m)+","+str(n) + ")\n\n\n\nML est is purple")
 plt.savefig("../../tmp/"+str(R)+"_"+str(n_div)+"_"+str(N)+"_"+str(k)+"_"+str(deg))
