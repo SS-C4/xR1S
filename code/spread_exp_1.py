@@ -4,20 +4,20 @@ import random as rnd
 import networkx as nx
 from estimators import *
 import numpy as np
-import pyximport; pyximport.install()
 import time
+import os
 
 t0 = time.time()
 #Restrict source to set R -> The first R nodes closest to the center
-R = 20
+R = 15
 #Stop after k infections in total (including source)
-k = 100
+k = 99
 #Number of estimators
 n_est = 5
 #Run experiments
-N = 5000
+N = 4000
 #Number of divisions of [0,3] for threshold values
-n_div = 201
+n_div = 401
 #Spread rate $\lambda$
 l = 1
 #T_max for taking snapshot (Do not set above 5-10)
@@ -155,3 +155,6 @@ plt.axis([0,1,0,1])
 plt.text(0.7, 0.4, "R: "+str(R) + "\nn_div: "+str(n_div) + "\nN: "+str(N) + "\nk: "+str(k) + "\ndeg: "+str(deg)\
 	 + "\n(m,n): ("+str(m)+","+str(n) + ")\n\n\n\nML est is purple")
 plt.savefig("../../tmp/"+str(R)+"_"+str(n_div)+"_"+str(N)+"_"+str(k)+"_"+str(deg))
+
+#Remove if using on a different system
+os.system("../../copy_to_down.sh")
