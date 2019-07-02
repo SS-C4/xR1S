@@ -104,7 +104,7 @@ for i in range(N):
 		op[1] = est_1(s1, s1_1)
 		op[2] = est_2(s1, s1_1)
 		op[3] = est_3(R, s1, s1_1)
-		op[4] = est_4(s1, s1_1)
+		op[4] = est_5(s1, s1_1)
 
 		for n_thr, threshold in enumerate(np.linspace(0,3,n_div)):
 			for j in range(n_est):
@@ -127,7 +127,7 @@ for i in range(N):
 		op[1] = est_1(s1, s2)
 		op[2] = est_2(s1, s2)
 		op[3] = est_3(R, s1, s2)
-		op[4] = est_4(s1, s2)
+		op[4] = est_5(s1, s2)
 
 		for n_thr, threshold in enumerate(np.linspace(0,3,n_div)):
 			for j in range(n_est):
