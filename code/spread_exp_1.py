@@ -1,4 +1,3 @@
-from __future__ import division
 import matplotlib.pyplot as plt
 import random as rnd
 import networkx as nx
@@ -11,13 +10,13 @@ t0 = time.time()
 #Restrict source to set R -> The first R nodes closest to the center
 R = 15
 #Stop after k infections in total (including source)
-k = 99
+k = 100
 #Number of estimators
-n_est = 5
+n_est = 3
 #Run experiments
-N = 4000
+N = 5000
 #Number of divisions of [0,3] for threshold values
-n_div = 401
+n_div = 801
 #Spread rate $\lambda$
 l = 1
 #T_max for taking snapshot (Do not set above 5-10)
@@ -100,13 +99,11 @@ for i in range(N):
 		s1 = G.subgraph([str(i) for i in inf_nodes_1])
 		s1_1 = G.subgraph([str(i) for i in inf_nodes_1_1])
 
-		op[0] = est_0(s1, s1_1)
-		op[1] = est_1(s1, s1_1)
-		op[2] = est_2(s1, s1_1)
-		op[3] = est_3(R, s1, s1_1)
-		op[4] = est_5(s1, s1_1)
+		op[0] = est_2(s1, s1_1)
+		op[1] = est_3(R, s1, s1_1)
+		op[2] = est_5(s1, s1_1)
 
-		for n_thr, threshold in enumerate(np.linspace(0,3,n_div)):
+		for n_thr, threshold in enumerate(np.linspace(0,6,n_div)):
 			for j in range(n_est):
 				if op[j] >= threshold:
 					TP[n_thr][j] += 1
@@ -123,20 +120,18 @@ for i in range(N):
 		s1 = G.subgraph([str(i) for i in inf_nodes_1])
 		s2 = G.subgraph([str(i) for i in inf_nodes_2])
 
-		op[0] = est_0(s1, s2)
-		op[1] = est_1(s1, s2)
-		op[2] = est_2(s1, s2)
-		op[3] = est_3(R, s1, s2)
-		op[4] = est_5(s1, s2)
+		op[0] = est_2(s1, s2)
+		op[1] = est_3(R, s1, s2)
+		op[2] = est_5(s1, s2)
 
-		for n_thr, threshold in enumerate(np.linspace(0,3,n_div)):
+		for n_thr, threshold in enumerate(np.linspace(0,6,n_div)):
 			for j in range(n_est):
 				if op[j] >= threshold:
 					FP[n_thr][j] += 1
 				else:
 					TN[n_thr][j] += 1
 
-for n_thr, threshold in enumerate(np.linspace(0,3,n_div)):
+for n_thr, threshold in enumerate(np.linspace(0,6,n_div)):
 	for i in range(n_est):
 		tpr[i] += [TP[n_thr][i]/(TP[n_thr][i]+FN[n_thr][i])]
 		fpr[i] += [FP[n_thr][i]/(TN[n_thr][i]+FP[n_thr][i])]
@@ -146,7 +141,7 @@ print (time.time() - t0)
 plt.plot([0,1], [0,1], 'b--')
 
 colors = ['g','r','c','m','y','k']
-markers = ['-','-','v-','^--','-','-']
+markers = ['v-','--','-','-','-','-']
 
 for i in range(n_est):
 	plt.plot(fpr[i], tpr[i], ''.join(colors[i] + markers[i]))
