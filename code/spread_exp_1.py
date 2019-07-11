@@ -1,35 +1,42 @@
 import matplotlib.pyplot as plt
+from matplotlib import rcParams
 import random as rnd
 import networkx as nx
 from estimators import *
-import numpy as np
+import pyximport; pyximport.install()
+from numpy import linspace, cumsum, unique
 import time
 import os
 
+rcParams['figure.figsize'] = 12, 12 
+
 t0 = time.time()
 #Restrict source to set R -> The first R nodes closest to the center
-R = 15
+R = 10
 #Stop after k infections in total (including source)
-k = 100
+k = 80
 #Number of estimators
 n_est = 3
 #Run experiments
-N = 5000
-#Number of divisions of [0,3] for threshold values
-n_div = 801
+N = 4000
+#Number of divisions of [0,TT]
+n_div = 401
 #Spread rate $\lambda$
 l = 1
-#T_max for taking snapshot (Do not set above 5-10)
+#Time_max for taking snapshot (Do not set above 5-10)
 T_max = 20
 
-#Gives size of snapshot after waiting for T_max
-def snap_size(deg, T_max):
-	T = 0
-	k = 1
-	while T <= T_max:
-		T += np.random.exponential(float(1/(l*deg + (k-1)*(deg-2))))
-		k += 1
-	return k
+#Maximum threshold required (for ML) (Should be bounded by R / (sqrt(pi*k/2) - 1) for a line)
+TT = 2
+
+# #Gives size of snapshot after waiting for T_max
+# def snap_size(deg, T_max):
+# 	T = 0
+# 	k = 1
+# 	while T <= T_max:
+# 		T += np.random.exponential(float(1/(l*deg + (k-1)*(deg-2))))
+# 		k += 1
+# 	return k
 
 def si_model_rumor_spreading(source, adjacency, N):
 	infctn_pattern = [-1]*N;
@@ -78,13 +85,13 @@ fpr = [[] for i in range(n_est)]
 
 op = [0 for i in range(n_est)]
 
-FP = np.zeros((n_div,n_est), dtype = int)
-TP = np.zeros((n_div,n_est), dtype = int)
-FN = np.zeros((n_div,n_est), dtype = int)
-TN = np.zeros((n_div,n_est), dtype = int)
+FP = [n_est*[0] for _ in range(n_div)]
+TP = [n_est*[0] for _ in range(n_div)]
+FN = [n_est*[0] for _ in range(n_div)]
+TN = [n_est*[0] for _ in range(n_div)]
 
 #Populate array with random choices (1,2)
-rchoice = np.random.randint(1,3,N)
+rchoice = [rnd.choice([1,2]) for _ in range(N)]
 
 #Run exp N times
 for i in range(N):
@@ -101,11 +108,11 @@ for i in range(N):
 
 		op[0] = est_2(s1, s1_1)
 		op[1] = est_3(R, s1, s1_1)
-		op[2] = est_5(s1, s1_1)
+		op[2] = est_4(G, s1, s1_1)
 
-		for n_thr, threshold in enumerate(np.linspace(0,6,n_div)):
+		for n_thr, threshold in enumerate(linspace(-0.01,TT,n_div)):
 			for j in range(n_est):
-				if op[j] >= threshold:
+				if op[j] > threshold:
 					TP[n_thr][j] += 1
 				else:
 					FN[n_thr][j] += 1
@@ -113,6 +120,8 @@ for i in range(N):
 	else:
 		source_1 = int(rnd.choice(liss))
 		source_2 = int(rnd.choice(liss))
+		while source_2 == source_1:
+			source_2 = int(rnd.choice(liss))
 
 		inf_nodes_1 = si_model_rumor_spreading(source_1, to_int(nx_graph_to_adj(G)), m)
 		inf_nodes_2 = si_model_rumor_spreading(source_2, to_int(nx_graph_to_adj(G)), n)
@@ -122,16 +131,16 @@ for i in range(N):
 
 		op[0] = est_2(s1, s2)
 		op[1] = est_3(R, s1, s2)
-		op[2] = est_5(s1, s2)
+		op[2] = est_4(G, s1, s2)
 
-		for n_thr, threshold in enumerate(np.linspace(0,6,n_div)):
+		for n_thr, threshold in enumerate(linspace(-0.01,TT,n_div)):
 			for j in range(n_est):
-				if op[j] >= threshold:
+				if op[j] > threshold:
 					FP[n_thr][j] += 1
 				else:
 					TN[n_thr][j] += 1
 
-for n_thr, threshold in enumerate(np.linspace(0,6,n_div)):
+for n_thr, threshold in enumerate(linspace(-0.01,TT,n_div)):
 	for i in range(n_est):
 		tpr[i] += [TP[n_thr][i]/(TP[n_thr][i]+FN[n_thr][i])]
 		fpr[i] += [FP[n_thr][i]/(TN[n_thr][i]+FP[n_thr][i])]
@@ -141,15 +150,15 @@ print (time.time() - t0)
 plt.plot([0,1], [0,1], 'b--')
 
 colors = ['g','r','c','m','y','k']
-markers = ['v-','--','-','-','-','-']
+markers = ['v-','--','o-','-','-','-']
 
 for i in range(n_est):
 	plt.plot(fpr[i], tpr[i], ''.join(colors[i] + markers[i]))
 
-plt.axis([0,1,0,1])
+plt.axis([0,1.1,0,1.1])
 plt.text(0.7, 0.4, "R: "+str(R) + "\nn_div: "+str(n_div) + "\nN: "+str(N) + "\nk: "+str(k) + "\ndeg: "+str(deg)\
-	 + "\n(m,n): ("+str(m)+","+str(n) + ")\n\n\n\nML est is purple")
-plt.savefig("../../tmp/"+str(R)+"_"+str(n_div)+"_"+str(N)+"_"+str(k)+"_"+str(deg))
+	 + "\n(m,n): ("+str(m)+","+str(n) + ")\n\n\n\nML est is the dotted line")
+plt.savefig("../../tmp/"+str(R)+"_"+str(N)+"_"+str(k)+"_"+str(deg))
 
 #Remove if using on a different system
 os.system("../../copy_to_down.sh")
