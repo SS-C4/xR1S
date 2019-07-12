@@ -2,7 +2,6 @@ from operator import mul
 from functools import reduce
 from math import factorial
 import networkx as nx
-from random import randrange
 
 # def generate_source(adjacency):
 #     num_nodes = len(adjacency)
@@ -52,10 +51,10 @@ def rumor_center(who_infected):
     max_down_ind = [i for i, (j,k) in enumerate(down_messages) if float(j/k) == max_down]
 
     #To break ties at random
-    broken_tie = max_down_ind[randrange(0,len(max_down_ind),1)]
+    #broken_tie = max_down_ind[randrange(0,len(max_down_ind),1)]
     
     #Choose the first one
-    #broken_tie = max_down_ind[0]
+    broken_tie = max_down_ind[0]
 
     return broken_tie
 

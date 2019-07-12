@@ -12,22 +12,23 @@ rcParams['figure.figsize'] = 12, 12
 
 t0 = time.time()
 #Restrict source to set R -> The first R nodes closest to the center
-R = 10
+R = 150
 #Stop after k infections in total (including source)
-k = 80
+k = 300
 #Number of estimators
 n_est = 3
 #Run experiments
-N = 4000
+N = 5000
 #Number of divisions of [0,TT]
-n_div = 401
+n_div = 801
 #Spread rate $\lambda$
 l = 1
 #Time_max for taking snapshot (Do not set above 5-10)
 T_max = 20
 
 #Maximum threshold required (for ML) (Should be bounded by R / (sqrt(pi*k/2) - 1) for a line)
-TT = 2
+#Needs to be much higher for higher degree of tree
+TT = 5
 
 # #Gives size of snapshot after waiting for T_max
 # def snap_size(deg, T_max):
@@ -155,7 +156,7 @@ markers = ['v-','--','o-','-','-','-']
 for i in range(n_est):
 	plt.plot(fpr[i], tpr[i], ''.join(colors[i] + markers[i]))
 
-plt.axis([0,1.1,0,1.1])
+plt.axis([-0.1,1.1,-0.1,1.1])
 plt.text(0.7, 0.4, "R: "+str(R) + "\nn_div: "+str(n_div) + "\nN: "+str(N) + "\nk: "+str(k) + "\ndeg: "+str(deg)\
 	 + "\n(m,n): ("+str(m)+","+str(n) + ")\n\n\n\nML est is the dotted line")
 plt.savefig("../../tmp/"+str(R)+"_"+str(N)+"_"+str(k)+"_"+str(deg))
