@@ -92,8 +92,27 @@ def est_4(G, s1, s2):
 
 	return (float(1 / (nx.shortest_path_length(G, loc_1, loc_2)+1)))
 
-#Estimator 5 -> Overlap ratio and number of leaves in the difference
-def est_5(s1, s2):
+#Estimator 5 -> Comparing distance centers
+def est_5(G, s1, s2):
+	s1_num = s1.number_of_nodes()
+	s2_num = s2.number_of_nodes()
+
+	#map to 0..(s1_num-1)
+	mapdict_1 = {j : i for i,j in enumerate([i for i in s1.nodes()])}
+	mapdict_2 = {j : i for i,j in enumerate([i for i in s2.nodes()])}
+	a1 = nx.relabel_nodes(s1, mapdict_1, copy = True)
+	a2 = nx.relabel_nodes(s2, mapdict_2, copy = True)
+	
+	loc_1 = jordan_center(to_int(nx_graph_to_adj(a1)))
+	loc_2 = jordan_center(to_int(nx_graph_to_adj(a2)))
+	
+	loc_1 = (list(mapdict_1.keys()))[int(loc_1)]
+	loc_2 = (list(mapdict_2.keys()))[int(loc_2)]
+
+	return (float(1 / (nx.shortest_path_length(G, loc_1, loc_2)+1)))
+
+#Estimator 6 -> Overlap ratio and number of leaves in the difference
+def est_6(s1, s2):
 	s1_num = s1.number_of_nodes()
 	s2_num = s2.number_of_nodes()
 

@@ -2,6 +2,8 @@ from operator import mul
 from functools import reduce
 from math import factorial
 import networkx as nx
+from random import random, randrange, randint
+import numpy as np
 
 # def generate_source(adjacency):
 #     num_nodes = len(adjacency)
@@ -51,10 +53,10 @@ def rumor_center(who_infected):
     max_down_ind = [i for i, (j,k) in enumerate(down_messages) if float(j/k) == max_down]
 
     #To break ties at random
-    #broken_tie = max_down_ind[randrange(0,len(max_down_ind),1)]
+    broken_tie = max_down_ind[randrange(0,len(max_down_ind),1)]
     
-    #Choose the first one
-    broken_tie = max_down_ind[0]
+    # #Choose the first one
+    # broken_tie = max_down_ind[0]
 
     return broken_tie
 
@@ -76,6 +78,103 @@ def RC_values(who_infected, loc):
     vals = [(i, (j*scale // k)) for i, (j,k) in enumerate(down_messages)]
     return vals
 	
+#Jordan center stuff
+def get_messages(parent,node,adjacency,up_count,up_count_2nd,up_id,up_id_2nd):
+    # obtains the message from node to parent
+    
+    children = adjacency[node]
+    
+    # deal with leaves
+    if len(children) > 1:    
+        # forward messages appropriately
+        for child in children:     
+            
+            if child == parent:
+                continue
+            up_count, up_count_2nd, up_id, up_id_2nd = get_messages(node, child, adjacency, up_count, up_count_2nd, up_id, up_id_2nd)
+            up_count, up_count_2nd, up_id, up_id_2nd = update_counts(node, child, up_count, up_count_2nd, up_id, up_id_2nd)
+    
+    return up_count, up_count_2nd, up_id, up_id_2nd
+    
+def update_counts(parent, node, up_count, up_count_2nd, up_id, up_id_2nd):
+    # updates the message arrays for jordan centrality
+    
+    candidates = np.array([up_count[parent], up_count_2nd[parent], up_count[node]+1])
+        
+    sorted_vals = np.sort(candidates)
+    indices = np.argsort(candidates)
+    
+    up_count[parent] = sorted_vals[-1]
+    up_count_2nd[parent] = sorted_vals[-2]
+    if (indices[-1] == 2): # the incoming max is the largest
+        up_id_2nd[parent] = up_id[parent]
+        up_id[parent] = node
+        
+    elif (indices[-2] == 2): # the incoming max is 2nd largest
+        # up_id stays the same
+        up_id_2nd[parent] = node
+            
+    return up_count, up_count_2nd, up_id, up_id_2nd
+    
+def find_center(root, up_count, up_count_2nd, up_id, up_id_2nd):
+    # finds the center of the graph using jordan centrality metric, after messages have been passed
+    idx = root
+    l1 = up_count[idx]
+    l2 = up_count_2nd[idx]
+    breakflag = False
+    while True:
+        if (l1-l2) == 0:
+            idx_jordan = idx
+            break
+        elif (abs(l1-l2)) == 1:
+            if breakflag:
+                # break ties randomly
+                if random() < 0.5:
+                    idx_jordan = idx
+                # choose the first one
+                break
+            breakflag = True
+            idx_jordan = idx
+        elif breakflag:
+            # there's no tie, so use the previously found index
+            break
+            
+        idx = up_id[idx]
+        l2 = l2 + 1
+        l1 = l1 - 1
+
+        if (l1 <= 1):
+            idx_jordan = idx
+            break
+    return idx_jordan
+
+def jordan_center(adjacency):
+    # computes the estimate of the source based on jordan centrality
+    num_nodes = len(adjacency)
+    
+    if num_nodes == 1:
+        return 0
+    elif num_nodes == 2:
+        return int(random.random() < 0.5)
+
+    # choose a root that is not a leaf
+    while True:
+        root = randint(0,num_nodes-1)
+        if len(adjacency[root]) > 1:
+            break
+    # initialize lists
+    up_count = [0 for i in range(num_nodes)]
+    up_count_2nd = [0 for i in range(num_nodes)]
+    up_id = [-1 for i in range(num_nodes)]
+    up_id_2nd = [-1 for i in range(num_nodes)]
+    
+    # start passing messages
+    up_count, up_count_2nd, up_id, up_id_2nd = get_messages(root, root, adjacency, up_count, up_count_2nd, up_id, up_id_2nd)
+    
+    # now find the jordan center
+    idx_jordan = find_center(root, up_count, up_count_2nd, up_id, up_id_2nd)
+    return idx_jordan
+
 def nx_graph_to_adj(graph):
     tmp1 = graph.adjacency()    
     

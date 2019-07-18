@@ -12,9 +12,9 @@ rcParams['figure.figsize'] = 12, 12
 
 t0 = time.time()
 #Restrict source to set R -> The first R nodes closest to the center
-R = 150
+R = 30
 #Stop after k infections in total (including source)
-k = 300
+k = 201
 #Number of estimators
 n_est = 3
 #Run experiments
@@ -28,7 +28,7 @@ T_max = 20
 
 #Maximum threshold required (for ML) (Should be bounded by R / (sqrt(pi*k/2) - 1) for a line)
 #Needs to be much higher for higher degree of tree
-TT = 5
+TT = 10
 
 # #Gives size of snapshot after waiting for T_max
 # def snap_size(deg, T_max):
@@ -151,7 +151,7 @@ print (time.time() - t0)
 plt.plot([0,1], [0,1], 'b--')
 
 colors = ['g','r','c','m','y','k']
-markers = ['v-','--','o-','-','-','-']
+markers = ['v-','--','o-','^-','-','-']
 
 for i in range(n_est):
 	plt.plot(fpr[i], tpr[i], ''.join(colors[i] + markers[i]))
